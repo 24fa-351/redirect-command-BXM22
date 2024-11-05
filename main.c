@@ -1,19 +1,24 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include "redir.h"
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        fprintf(stderr, "Usage: %s <inp> <cmd> <out>\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
 
     char *inp = argv[1];
     char *cmd = argv[2];
     char *out = argv[3];
 
-    
+    char *args[256];
+    split(cmd, args);
 
+    pid_t pid = fork_process();
+
+    if (pid < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        redir_in(inp);
+        redir_out(out);
+        execute(args);
+    }
     return 0;
 }
